@@ -27,3 +27,34 @@ impl SystemCall for Endpoint {
     /// second half blocks untill something to recv
     fn reply_recv() {}
 }
+
+/// Implemented as a bit-packed word
+struct MessageInfo {
+    /// Not intepreted by the kernel
+    /// Passed as first data-payload of msg
+    /// E.g. to specify the requested operation
+    label: Word,
+    /// Number of capabilities involved
+    extra_caps: Word,
+    /// Only used on the recieving side.
+    /// Indicates the manner in which caps were recieved
+    /// See seL4 manual section 4.2.2
+    caps_unwrapped: Word,
+    length: Word,
+}
+
+
+struct IPCBuffer {
+    tag: MessageInfo,
+    /// Content
+    msg: [Word ; 120],
+    /// Base address of structure.
+    /// Used by supporting libraries
+    user_data: Word,
+    /// Buffer for sending caps, and recieving badges.
+    caps_badges: CapBadgeBuf,
+    /// A CNode to find the recieve slot
+    recv_idx: CapPtr,
+    /// number of bits recv_indx is to use
+    recv_depth: Word,
+}

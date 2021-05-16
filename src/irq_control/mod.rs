@@ -1,3 +1,8 @@
+use crate::types::*;
+use crate::cspace::{
+    CapPtr,
+    CapSpaceNode,
+};
 struct IRQControl {}
 
 impl IRQControl {

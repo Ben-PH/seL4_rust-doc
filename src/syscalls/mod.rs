@@ -1,6 +1,5 @@
-use crate::primitives::*;
 use crate::cspace::CapPtr;
-use crate::MessageInfo;
+use crate::types::*;
 pub trait SysCall {
     ///
     /// Delivers msg through named cap & the app to continue

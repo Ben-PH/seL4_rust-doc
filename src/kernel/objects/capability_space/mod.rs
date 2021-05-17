@@ -1,19 +1,21 @@
-//! Instances of these are invoked by applications
+//! A threads capability management system.
 //!
-//! The interfaces to these objects form the interface to the
-//! kernel itself. The creation and use of kernel services is
-//! achieved by the creation, manipulation, and cmbination of
-//! these objects.
+//!
+//! A diagram showing an example layout of a cap-space with 32 bits. Legal, though impractical.
+//!
+//!  * It has circular references
+//!  * Small number of slots
+//!
 //! ```text
 //!                                       Guard
 //!                                      ┌──────────────┐
 //!                             ┌──────► │ 0x0(4bits)   │ 
 //!       ┌───────────────┐     │        └───────┬──────┘
-//!       │ CNode         │     │                │
+//!       │ CapNode       │     │                │
 //!       └─────────┬─────┘     │        ┌───────┴──────┐
 //!                 │           │        │              │
 //!                 │           │    0x00├────────────┬─┤
-//!                 │           │        │  CNode     │┼┼───► No bits remaining
+//!                 │           │        │  CapNode   │┼┼───► No bits remaining
 //!        Guard    ▼           │        ├────────────┴─┤
 //!       ┌──────────────┐      │        │              │
 //! ┌───► │ 0x000(12bits)│      │        ├──────────────┤
@@ -22,7 +24,7 @@
 //! │     ┌──────┴───────┐      │        │              │
 //! │     │              │      │        ├──────────────┤
 //! │ 0x00├────────────┬─┤      │        │ Object       │
-//! │     │  CNode     │┼┼──────┘        ├──────────────┤
+//! │     │  CapNode   │┼┼──────┘        ├──────────────┤
 //! │     ├────────────┴─┤               │ Object       │
 //! │     │              │               ├──────────────┤
 //! │     ├──────────────┤               │              │
@@ -38,7 +40,7 @@
 //! │     ├──────────────┤               ┌──────────────┐
 //! │     │              │   ┌──────────►│ o0(3bits)    │
 //! │     ├─────────────┬┤   │           └──────┬───────┘
-//! │     │ CNode       │┼───┘                  │
+//! │     │ CapNode     │┼───┘                  │
 //! │     ├─────────────┴┤               ┌──────┴───────┐
 //! │     │              │               │              │
 //! │ 0xFF└──────────────┘           0x00├──────────────┤
@@ -63,26 +65,12 @@
 //! └────────────────────────────────────┤ CNode        │
 //!                                   0xF└──────────────┘
 //! ```
-//! Demonstration of a CNode structure.
 //!
-//! The CNode on the left is our top-level. It has a radix-12 guard
-//! set to 0x000, and 256 slots (taking 8 bits).
-//! Observe, that with radix-8 slots, max index is 0xFF
-//!
-//! * a slot can contain an Object, or a reference to another CNode
-//! * A slot entry can refer to the top-level CNode
-//! * A CNode can have a guard of variable radix
-//! * Both 2nd level CNodes have 12 bits remaining
-//! * The top Consumes 4(guard) + 8(radix) == 12,
-//!   leaving none remaining.
-//! * The bottom consumes 3(guard) + 4(radix) bits, leaving 5 bits
-//!   for subsequent CNodes.
-//!
-//! Practically speaking, this example is not much good:
-//!  * It has circular references
-//!  * Small number of slots
+#![allow(unused_variables, dead_code)]
 
 use crate::types::*;
+mod cap_node;
+pub use cap_node::*;
 
 pub enum CapErr {
     InvalidArgument,
@@ -97,101 +85,10 @@ pub enum CapErr {
     NotEnoughMemoory,
 }
 pub struct Guard {
-    value: Word,
-    bits: u8,
+    pub value: Word,
+    pub bits: u8,
 }
-pub type CapPtr = Word;
 
-pub struct CapSpaceNode {
-    guard_bits: u8,
-    radix: u8,
-}
-impl CapSpaceNode {
-    /// Copy a capability, sitting its rights in the process
-    /// Optionally: Will mint this new cap with a badge, if provided
-    fn mint(
-        dest_root: &mut CapSpaceNode,
-        dest_slot: CapPtr,
-        dest_depth: u8,
-        src_root: &CapSpaceNode,
-        src_idx: CapPtr,
-        src_depth: u8,
-        rights: CapRights,
-        badge: Option<Word>,
-    ) -> Result<(),()> {panic!();}
-
-    /// Move a capability from one slot to another.
-    /// Set a src_root to move between cap space
-    ///
-    /// Can optionally mutate the moved/new cap with a new badge
-    fn r#move(
-        dest_root: &mut CapSpaceNode,
-        dest_idx: CapPtr,
-        dest_depth: Word,
-        src_root: Option<&mut CapSpaceNode>,
-        src_idx: CapPtr,
-        src_depth: u8,
-        mutation: Option<Badge>,
-    ) -> Result<(),()> {
-        if let Some(src_root) = src_root {
-            assert_ne!(src_root as * const _, dest_root as * const _);
-        } else {
-            // handle the src and dest clashing
-        }
-        panic!();
-    }
-    fn rotate(
-        fst_root: &mut CapSpaceNode,
-        fst_idx: CapPtr,
-        fst_depth: Word,
-        scd_root: Option<&mut CapSpaceNode>,
-        scd_idx: CapPtr,
-        scd_depth: u8,
-        thd_root: Option<&mut CapSpaceNode>,
-        thd_idx: CapPtr,
-        thd_depth: u8,
-    ) -> Result<(),()> {panic!();}
-        // fst => scnd
-        // scnd => thd
-        // thd => fst
-    /// Index into a root CapNode and delete that cap
-    fn delete(
-        root_node: &mut CapSpaceNode,
-        idx: CapPtr,
-        depth: u8,
-    ) -> Result<(),()>{panic!();}
-
-    /// Delete all child capabilities of a given capability
-    /// TODO: grok the documentation (3.2), and translate it
-    fn revoke(
-        root_node: &mut CapSpaceNode,
-        idx: CapPtr,
-        depth: u8,
-    ){}
-
-    /// Save the kernel generated reply capability from the
-    /// most recent time the thread was called, placing it
-    /// into this CapSpace so it can be used later
-    fn save_caller(
-        root_capnode: &mut CapSpaceNode,
-        idx: CapPtr,
-        depth: u8,
-    ) -> Result<(),()> {panic!();}
-    /// Allows the reuse of badges by an authority.
-    ///
-    /// Badged Endpoints only
-    ///   -> anything else, will have no effect
-    ///
-    /// The badged endpoint being looked up
-    /// has its list of outstanding send operations
-    /// with a matching badge
-    fn cancel_badged_sends(
-        root_node: &CapSpaceNode,
-        // TODO, restrict this to and endpoint only.
-        idx: CapPtr,
-        depth: u8
-    ) -> Result<(),()> {panic!();}
-}
 /// ```text
 /// ┌─────────────────────┐
 /// │L1 CapNode CapPtr    │
@@ -200,7 +97,7 @@ impl CapSpaceNode {
 ///       ┌──────────────────┐
 /// Guard │ 0x0(4bits)       │
 ///       └──────────────────┘
-/// 
+///
 ///   0x00┌──────────────────┐
 ///       │                  │
 ///   0x0F├──────────────────┤
@@ -234,7 +131,7 @@ impl CapSpaceNode {
 ///  * with depth limit of 12, only left-most 12 bits are assesed, preventing a dereference
 /// ```
 pub struct Slot {
-    idx: Word,
+    idx: CapPtr,
     depth: u8,
 }
 
@@ -291,10 +188,111 @@ pub enum LookupFailure {
 /// |             |             |             | in reply    |             |
 /// |             |             |             | message     |             |
 /// +-------------+-------------+-------------+-------------+-------------+
-enum CapRights {
+pub enum CapRights {
     Read,
     Write,
     Grant,
     GrantReply,
 }
+pub struct CapSpace {
+    root: CapNode,
+}
 
+
+impl CapSpace {
+    /// [mint], with badge set to `None`
+    fn copy(
+        &mut self,
+        src_slot: Slot,
+        src_root: Option<CapNode>,
+        dest_slot: Slot,
+        rights: CapRights,
+    ) -> Result<(),()> {panic!();}
+    /// Copy a capability, setting its rights in the process
+    ///
+    /// Optionally: Will mint this new cap with a badge, if provided
+    fn mint(
+        &mut self,
+        src_slot: Slot,
+        src_root: Option<CapNode>,
+        dest_slot: Slot,
+        rights: CapRights,
+        badge: Option<Badge>,
+    ) -> Result<(),()> {panic!();}
+
+    /// Move a capability from one slot to an empty slot.
+    ///
+    /// Can optionally mutate the moved/new cap with a new badge
+    /// Destination slot must be empty
+    /// The source slot becomes empty
+    fn r#move(
+        &mut self,
+        src_slot: Slot,
+        dest_root: Option<&mut CapNode>,
+        dest_slot: Slot,
+        mutation: Option<Badge>,
+    ) -> Result<(),()> {panic!();}
+
+    
+    /// Two moves in a single, atomic operation
+    ///
+    /// The pivot slot must be distinct from the source and destination
+    /// The destination slot must be empty, unless it's the same as the source,
+    /// in which case, its content will be swapped with the pivot slot
+    ///
+    /// analagous to the following, only done atomically
+    /// ```
+    /// // src != dest
+    /// move(pivot, src);
+    /// move(dest, pivot);
+    /// // src == dst
+    /// move(src, temp)
+    /// move(pivot, dest) // or move(pivot, src), as src == dest
+    /// move(temp, pivot)
+    /// ```
+    fn rotate(
+        dest_slot: Slot,
+        pivot_root: Option<&mut CapNode>,
+        pivot_slot: Slot,
+        source_root: Option<&mut CapNode>,
+        source_slot: Slot,
+    ) -> Result<(),()> {panic!();}
+        // fst => scnd
+        // scnd => thd
+        // thd => fst
+    /// Index into a root CapNode and delete that cap
+    fn delete(
+        root_node: &mut CapNode,
+        slot: Slot,
+    ) -> Result<(),()>{panic!();}
+
+    /// Equivilent to [delete] on each capability derived from `slot`
+    ///
+    /// Refer to [Untyped] documentation for further details on
+    /// capability derivation.
+    fn revoke(
+        &mut self,
+        slot: Slot,
+    ){}
+
+    /// Save the kernel generated reply capability from the
+    /// most recent time the thread was called, placing it
+    /// into this CapSpace so it can be used later
+    fn save_caller(
+        root_capnode: &mut CapNode,
+        slot: Slot,
+    ) -> Result<(),()> {panic!();}
+    /// Allows the reuse of badges by an authority.
+    ///
+    /// Badged Endpoints only
+    ///   -> anything else, will have no effect
+    ///
+    /// The badged endpoint being looked up
+    /// has its list of outstanding send operations
+    /// with a matching badge
+    fn cancel_badged_sends(
+        root_node: &CapNode,
+        // TODO, restrict this to and endpoint only.
+        slot: Slot,
+    ) -> Result<(),()> {panic!();}
+}

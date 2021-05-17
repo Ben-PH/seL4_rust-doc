@@ -1,31 +1,32 @@
+//! The kernel object that Threads use to send/recieve IPC messages.
+#![allow(unused_variables, dead_code)]
+use crate::types::CapPtr;
+use crate::types::Word;
+
 /// Allow data and caps (namely: IPCBuffer) to x-fered between 2 threads.
 ///
 /// Invoked directly using systemcalls
-pub struct Endpoint {
-    
-}
+pub struct EndPoint {}
 
-impl Endpoint {
+impl EndPoint {
     /// adds a capability to be included in the next message send
     /// Requires Grand permissions on this endpoint
     /// * Without Grant permissions, only raw msg sent (no cap x-fer)
     pub fn load_cap(cap: CapPtr){unimplemented!()}
-}
 
-impl SystemCall for Endpoint {
     /// blocking untill recieved
     /// error is ignored: kernel not allowed to reply
     /// requires Write permissions
-    fn send() -> Result<??, ()>{}
+    pub fn send() -> Result<(), ()>{unimplemented!()}
     /// blocking untill recieved
     /// requires Write permissions
-    fn call() -> Result<??, ??>{}
+    pub fn call() -> Result<(), ()>{unimplemented!()}
 
     /// block until something to recieve
     /// raises a fault if without read permissions
-    fn recv() {}
+    pub fn recv() {}
     /// second half blocks untill something to recv
-    fn reply_recv() {}
+    pub fn reply_recv() {}
 }
 
 /// Implemented as a bit-packed word
@@ -44,6 +45,7 @@ struct MessageInfo {
 }
 
 
+struct CapBadgeBuf([Word ; 120]);
 struct IPCBuffer {
     tag: MessageInfo,
     /// Content

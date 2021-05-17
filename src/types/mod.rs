@@ -1,6 +1,8 @@
 mod primitives;
 mod err;
 mod message;
+pub mod capabilities;
+
 
 pub use primitives::{
     Word,
@@ -14,3 +16,5 @@ pub use err::{
 pub use message::{
     MessageInfo,
 };
+
+pub struct CapPtr(Word);

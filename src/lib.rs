@@ -4,6 +4,10 @@
 //! This library is not even close to being suitable as a reference. Please refer to
 //! documentation provided by the seL4 project.
 //!
+//! # Attribution
+//!
+//! The vast majority of the doc-comment content in this library is either copied from the seL4 manual verbatim, or only slightly changed in words but not meaning. See also [acknowledgements]
+//!
 //! # Introduction
 //!
 //! This library is based on on the seL4 manual, and attribution for the text content,
@@ -31,12 +35,6 @@
 //! users should refer to the seL4 abstract specification, which gives a formal description
 //! of the seL4 kernel.
 //!
-//! # Library author comment
-//!
-//! This project intends to be a good-faith effort of replicating what the manual aims to
-//! communicate, without changing its meaning or detracting from its qualities. It is
-//! currently an independent project.
-//!
 //! # Rust library author comment
 //!
 //! This project intends to be a good-faith effort of replicating what the manual aims to
@@ -55,32 +53,16 @@
 //! I consider the measure of this projects success to be how close its generated docs might
 //! be, if the API was originally implemented using Rust while putting significant emphasis on
 //! teaching value the documentation provides.
+//!
+//! This library is limited to the aarch64 platform for the time being. 
 
-pub mod syscalls;
-pub use syscalls::SysCall;
-pub mod objects;
-pub use objects::Objects;
-pub mod cspace;
+//! To start, review the [kernel] module.
+
+pub mod kernel;
 pub mod types;
 pub mod irq_control;
+pub mod acknowledgements;
 
-pub enum Service {
-    /// Abstraction of CPU execution that supports running software
-    Thread,
-    /// Virtual memory space
-    /// Contains an application
-    /// App of one space cannot access memory of another
-    AddressSpace,
-    /// via endpoints. allows iter-thread message passing
-    InterProcessCommunication,
-    /// non-blocking signalling mechanism similar to binary semaphores
-    Notification,
-    /// allows device drivers to be implemented as unprivileged apps.
-    /// Kernel exports h/w dev interupts w/ IPC messages
-    DevicePrimitives,
-    /// Storage for access rights to kern services and their book-keeping info
-    CapabilitySpaces,
-}
 
 pub mod bibliography {
 

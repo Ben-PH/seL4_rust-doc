@@ -1,7 +1,7 @@
+#![allow(unused_variables, dead_code)]
 use crate::types::*;
-use crate::cspace::{
-    CapPtr,
-    CapSpaceNode,
+use crate::kernel::objects::capability_space::{
+    CapNode,
 };
 struct IRQControl {}
 
@@ -9,7 +9,7 @@ impl IRQControl {
     fn create_handler(
         &self,
         irq: Word,
-        root: &mut CapSpaceNode,
+        root: &mut CapNode,
         idx: CapPtr,
         depth: u8,
     ) -> () {}

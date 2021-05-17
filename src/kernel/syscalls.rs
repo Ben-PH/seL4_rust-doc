@@ -1,4 +1,4 @@
-use crate::cspace::CapPtr;
+#![allow(unused_variables)]
 use crate::types::*;
 pub trait SysCall {
     ///

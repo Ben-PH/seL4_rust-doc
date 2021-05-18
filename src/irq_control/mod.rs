@@ -1,6 +1,6 @@
 #![allow(unused_variables, dead_code)]
 use crate::types::*;
-use crate::kernel::objects::capability_space::{
+use crate::kernel_api::objects::capability_space::{
     CapNode,
 };
 struct IRQControl {}

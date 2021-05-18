@@ -33,7 +33,7 @@
 //! seL4 kernel, it is by no means a formal specification of the kernel. When
 //! the precise behaviour of the kernel under a particular circumstance needs to be known,
 //! users should refer to the seL4 abstract specification, which gives a formal description
-//! of the seL4 kernel.
+//! of the seL4 kernel. This can be found in the seL4 projects github account under the l4v repo.
 //!
 //! # Rust library author comment
 //!
@@ -56,12 +56,13 @@
 //!
 //! This library is limited to the aarch64 platform for the time being. 
 
-//! To start, review the [kernel] module.
+//! To start, review the [kernel_api] module.
 
-pub mod kernel;
+pub mod kernel_api;
 pub mod types;
 pub mod irq_control;
 pub mod acknowledgements;
+pub use kernel_api::syscalls;
 
 
 pub mod bibliography {

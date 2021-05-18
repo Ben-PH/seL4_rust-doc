@@ -6,7 +6,7 @@ use crate::types::Word;
 /// Allow data and caps (namely: IPCBuffer) to x-fered between 2 threads.
 ///
 /// Invoked directly using systemcalls
-pub struct EndPoint {}
+struct EndPoint {}
 
 impl EndPoint {
     /// adds a capability to be included in the next message send

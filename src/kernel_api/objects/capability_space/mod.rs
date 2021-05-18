@@ -6,6 +6,7 @@
 //!  * It has circular references
 //!  * Small number of slots
 //!
+//! Implemented with same principals as a _guard page table_
 //! ```text
 //!                                       Guard
 //!                                      ┌──────────────┐
@@ -171,6 +172,7 @@ pub enum LookupFailure {
     GuardMismatch(GuardMismatchData)
 }
 
+/// ```text
 /// +-------------+-------------+-------------+-------------+-------------+
 /// | Type        | Read        | Write       | Grant       | GrantReply  |
 /// +-------------+-------------+-------------+-------------+-------------+
@@ -188,6 +190,7 @@ pub enum LookupFailure {
 /// |             |             |             | in reply    |             |
 /// |             |             |             | message     |             |
 /// +-------------+-------------+-------------+-------------+-------------+
+/// ```
 pub enum CapRights {
     Read,
     Write,

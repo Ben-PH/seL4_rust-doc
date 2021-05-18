@@ -1,6 +1,6 @@
 
-#[allow(unused_imports)]
-use crate::kernel::objects::endpoints::EndPoint;
+#[cfg(doc)]
+use crate::types::capabilities::EndPoint;
 /// TODO confirm thet seL4_Word is usize_t
 pub struct Word(pub usize);
 /// Optionally added to an [EndPoint] capability on creation,

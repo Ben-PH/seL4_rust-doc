@@ -4,7 +4,7 @@ use crate::types::*;
 struct IRQControl {}
 
 impl IRQControl {
-    fn create_handler(&self, irq: Word, root: &mut CapNode, idx: CapPtr, depth: u8) -> () {}
+    fn create_handler(&self, irq: Word, root: &mut CapNode, idx: CapPtr, depth: u8) {}
 }
 struct IRQHandler {}
 impl IRQHandler {

@@ -9,4 +9,5 @@
 
 #[cfg(doc)]
 use super::Notification;
+#[cfg(doc)]
 use crate::types::capabilities::*;

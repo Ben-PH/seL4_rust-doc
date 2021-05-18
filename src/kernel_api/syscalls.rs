@@ -14,7 +14,12 @@
 
 #![allow(unused_variables)]
 use crate::types::*;
+use core::convert::TryFrom;
 
+/// A wraps a [MessageInfo]. Used to error check a syscall result.
+pub struct SysResult {
+    inner: MessageInfo,
+}
 #[cfg(doc)]
 use crate::types::capabilities::*;
 /// Delivers msg through named cap & the app to continue
@@ -89,4 +94,29 @@ pub fn reply_recv(
 /// thread is immediately rescheduled w/ fresh timeslice.
 pub fn r#yield() {
     unimplemented!()
+}
+
+impl TryFrom<SysResult> for MessageInfo {
+    type Error = crate::types::err::SeL4Error;
+    fn try_from(val: SysResult) -> core::result::Result<Self, Self::Error> {
+        use crate::types::err::SeL4Error::*;
+        match val.inner.label().0 {
+            0 => Ok(MessageInfo::default()),
+            1 => Err(InvalidArgument(panic!("get IPCBuffer[0]"))),
+            2 => Err(InvalidCapability(panic!("get IPCBuffer[0]"))),
+            3 => Err(IllegalOperation),
+            4 => Err(RangeError(panic!(
+                "get IPCBuffer[0, 2], and make a range error"
+            ))),
+            5 => Err(AlignmentError),
+            6 => Err(FailedLookup(panic!(
+                "get IPCBuffer[0, 2, ...], and make a lookup failure error"
+            ))),
+            7 => Err(TruncatedMessage),
+            8 => Err(DeleteFirst),
+            9 => Err(RevokeFirst),
+            10 => Err(NotEnoughMemory(panic!("get IPCBuffer[0]"))),
+            _ => unreachable!("the C libraries error enum should only be 0..=10"),
+        }
+    }
 }

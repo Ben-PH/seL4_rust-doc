@@ -41,7 +41,7 @@
 //! communicate, without changing its meaning or detracting from its qualities. It is
 //! currently an independent project.
 //!
-//! The intent is to leverage Rusts expressive type system 
+//! The intent is to leverage Rusts expressive type system
 //! Idiomatic Rust equivilant might follow these examples
 //!
 //!  * C "0 on success, error data arrangement depending on error" becomes `Result<(), SomeEnum>`
@@ -54,16 +54,15 @@
 //! be, if the API was originally implemented using Rust while putting significant emphasis on
 //! teaching value the documentation provides.
 //!
-//! This library is limited to the aarch64 platform for the time being. 
+//! This library is limited to the aarch64 platform for the time being.
 
 //! To start, review the [kernel_api] module.
 
+pub mod acknowledgements;
+pub mod irq_control;
 pub mod kernel_api;
 pub mod types;
-pub mod irq_control;
-pub mod acknowledgements;
 pub use kernel_api::syscalls;
-
 
 pub mod bibliography {
 

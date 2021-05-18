@@ -1,20 +1,12 @@
-mod primitives;
+pub mod capabilities;
 mod err;
 mod message;
-pub mod capabilities;
+mod primitives;
 
+pub use primitives::{Badge, Word};
 
-pub use primitives::{
-    Word,
-    Badge,
-};
+pub use err::Sel4Err;
 
-pub use err::{
-    Sel4Err,
-};
-
-pub use message::{
-    MessageInfo,
-};
+pub use message::MessageInfo;
 
 pub struct CapPtr(Word);

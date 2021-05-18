@@ -16,7 +16,9 @@ impl CapNode {
         src_depth: u8,
         rights: CapRights,
         badge: Option<Word>,
-    ) -> Result<(),()> {panic!();}
+    ) -> Result<(), ()> {
+        panic!();
+    }
 
     /// Move a capability from one slot to another.
     /// Set a src_root to move between cap space
@@ -30,9 +32,9 @@ impl CapNode {
         src_idx: CapPtr,
         src_depth: u8,
         mutation: Option<Badge>,
-    ) -> Result<(),()> {
+    ) -> Result<(), ()> {
         if let Some(src_root) = src_root {
-            assert_ne!(src_root as * const _, dest_root as * const _);
+            assert_ne!(src_root as *const _, dest_root as *const _);
         } else {
             // handle the src and dest clashing
         }
@@ -48,33 +50,27 @@ impl CapNode {
         thd_root: Option<&mut CapNode>,
         thd_idx: CapPtr,
         thd_depth: u8,
-    ) -> Result<(),()> {panic!();}
-        // fst => scnd
-        // scnd => thd
-        // thd => fst
+    ) -> Result<(), ()> {
+        panic!();
+    }
+    // fst => scnd
+    // scnd => thd
+    // thd => fst
     /// Index into a root CapNode and delete that cap
-    pub fn delete(
-        root_node: &mut CapNode,
-        idx: CapPtr,
-        depth: u8,
-    ) -> Result<(),()>{panic!();}
+    pub fn delete(root_node: &mut CapNode, idx: CapPtr, depth: u8) -> Result<(), ()> {
+        panic!();
+    }
 
     /// Delete all child capabilities of a given capability
     /// TODO: grok the documentation (3.2), and translate it
-    pub fn revoke(
-        root_node: &mut CapNode,
-        idx: CapPtr,
-        depth: u8,
-    ){}
+    pub fn revoke(root_node: &mut CapNode, idx: CapPtr, depth: u8) {}
 
     /// Save the kernel generated reply capability from the
     /// most recent time the thread was called, placing it
     /// into this CapSpace so it can be used later
-    pub fn save_caller(
-        root_capnode: &mut CapNode,
-        idx: CapPtr,
-        depth: u8,
-    ) -> Result<(),()> {panic!();}
+    pub fn save_caller(root_capnode: &mut CapNode, idx: CapPtr, depth: u8) -> Result<(), ()> {
+        panic!();
+    }
     /// Allows the reuse of badges by an authority.
     ///
     /// Badged Endpoints only
@@ -87,6 +83,8 @@ impl CapNode {
         root_node: &CapNode,
         // TODO, restrict this to and endpoint only.
         idx: CapPtr,
-        depth: u8
-    ) -> Result<(),()> {panic!();}
+        depth: u8,
+    ) -> Result<(), ()> {
+        panic!();
+    }
 }

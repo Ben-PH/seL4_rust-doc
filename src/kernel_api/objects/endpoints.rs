@@ -12,15 +12,21 @@ impl EndPoint {
     /// adds a capability to be included in the next message send
     /// Requires Grand permissions on this endpoint
     /// * Without Grant permissions, only raw msg sent (no cap x-fer)
-    pub fn load_cap(cap: CapPtr){unimplemented!()}
+    pub fn load_cap(cap: CapPtr) {
+        unimplemented!()
+    }
 
     /// blocking untill recieved
     /// error is ignored: kernel not allowed to reply
     /// requires Write permissions
-    pub fn send() -> Result<(), ()>{unimplemented!()}
+    pub fn send() -> Result<(), ()> {
+        unimplemented!()
+    }
     /// blocking untill recieved
     /// requires Write permissions
-    pub fn call() -> Result<(), ()>{unimplemented!()}
+    pub fn call() -> Result<(), ()> {
+        unimplemented!()
+    }
 
     /// block until something to recieve
     /// raises a fault if without read permissions
@@ -44,12 +50,11 @@ struct MessageInfo {
     length: Word,
 }
 
-
-struct CapBadgeBuf([Word ; 120]);
+struct CapBadgeBuf([Word; 120]);
 struct IPCBuffer {
     tag: MessageInfo,
     /// Content
-    msg: [Word ; 120],
+    msg: [Word; 120],
     /// Base address of structure.
     /// Used by supporting libraries
     user_data: Word,

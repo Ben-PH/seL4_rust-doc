@@ -15,14 +15,18 @@ impl Notification {
     /// Has the effect of concurrently signalling multiple spmaphores indicated by its badge
     /// If its badge is unset, or set to 0, it signals just the first thread waiting on the
     /// notification.
-    pub fn signal(&mut self) {unimplemented!()}
+    pub fn signal(&mut self) {
+        unimplemented!()
+    }
 
     /// if word == 0, then blocks
     /// else, immediate return with previous value
-    pub fn wait(self) -> Self{
+    pub fn wait(self) -> Self {
         unimplemented!()
     }
 
     /// non-blocking version of wait
-    pub fn poll(self) -> Self {unimplemented!()}
+    pub fn poll(self) -> Self {
+        unimplemented!()
+    }
 }

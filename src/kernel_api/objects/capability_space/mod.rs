@@ -10,7 +10,7 @@
 //! ```text
 //!                                       Guard
 //!                                      ┌──────────────┐
-//!                             ┌──────► │ 0x0(4bits)   │ 
+//!                             ┌──────► │ 0x0(4bits)   │
 //!       ┌───────────────┐     │        └───────┬──────┘
 //!       │ CapNode       │     │                │
 //!       └─────────┬─────┘     │        ┌───────┴──────┐
@@ -150,7 +150,7 @@ pub struct DepthMismatchData {
     /// Number of bits in the capability pointer left to decode
     bits_left: u8,
     /// Bits of current CNode being traversed resolved
-    bits_found:u8
+    bits_found: u8,
 }
 
 pub enum LookupFailure {
@@ -169,7 +169,7 @@ pub enum LookupFailure {
     /// When resolving a cap, a Cnode was traveresd
     /// * With a guard-size larger than the # of remaning bits, OR
     /// * The CNode's guard did not match the next bits of cap being resolved
-    GuardMismatch(GuardMismatchData)
+    GuardMismatch(GuardMismatchData),
 }
 
 /// ```text
@@ -201,7 +201,6 @@ pub struct CapSpace {
     root: CapNode,
 }
 
-
 impl CapSpace {
     /// [mint], with badge set to `None`
     fn copy(
@@ -210,7 +209,9 @@ impl CapSpace {
         src_root: Option<CapNode>,
         dest_slot: Slot,
         rights: CapRights,
-    ) -> Result<(),()> {panic!();}
+    ) -> Result<(), ()> {
+        panic!();
+    }
     /// Copy a capability, setting its rights in the process
     ///
     /// Optionally: Will mint this new cap with a badge, if provided
@@ -221,7 +222,9 @@ impl CapSpace {
         dest_slot: Slot,
         rights: CapRights,
         badge: Option<Badge>,
-    ) -> Result<(),()> {panic!();}
+    ) -> Result<(), ()> {
+        panic!();
+    }
 
     /// Move a capability from one slot to an empty slot.
     ///
@@ -234,9 +237,10 @@ impl CapSpace {
         dest_root: Option<&mut CapNode>,
         dest_slot: Slot,
         mutation: Option<Badge>,
-    ) -> Result<(),()> {panic!();}
+    ) -> Result<(), ()> {
+        panic!();
+    }
 
-    
     /// Two moves in a single, atomic operation
     ///
     /// The pivot slot must be distinct from the source and destination
@@ -259,32 +263,29 @@ impl CapSpace {
         pivot_slot: Slot,
         source_root: Option<&mut CapNode>,
         source_slot: Slot,
-    ) -> Result<(),()> {panic!();}
-        // fst => scnd
-        // scnd => thd
-        // thd => fst
+    ) -> Result<(), ()> {
+        panic!();
+    }
+    // fst => scnd
+    // scnd => thd
+    // thd => fst
     /// Index into a root CapNode and delete that cap
-    fn delete(
-        root_node: &mut CapNode,
-        slot: Slot,
-    ) -> Result<(),()>{panic!();}
+    fn delete(root_node: &mut CapNode, slot: Slot) -> Result<(), ()> {
+        panic!();
+    }
 
     /// Equivilent to [delete] on each capability derived from `slot`
     ///
     /// Refer to [Untyped] documentation for further details on
     /// capability derivation.
-    fn revoke(
-        &mut self,
-        slot: Slot,
-    ){}
+    fn revoke(&mut self, slot: Slot) {}
 
     /// Save the kernel generated reply capability from the
     /// most recent time the thread was called, placing it
     /// into this CapSpace so it can be used later
-    fn save_caller(
-        root_capnode: &mut CapNode,
-        slot: Slot,
-    ) -> Result<(),()> {panic!();}
+    fn save_caller(root_capnode: &mut CapNode, slot: Slot) -> Result<(), ()> {
+        panic!();
+    }
     /// Allows the reuse of badges by an authority.
     ///
     /// Badged Endpoints only
@@ -297,5 +298,7 @@ impl CapSpace {
         root_node: &CapNode,
         // TODO, restrict this to and endpoint only.
         slot: Slot,
-    ) -> Result<(),()> {panic!();}
+    ) -> Result<(), ()> {
+        panic!();
+    }
 }

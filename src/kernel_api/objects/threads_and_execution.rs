@@ -7,10 +7,8 @@
 //! Each thread belongs to exactly one [security domain]
 
 #[cfg(doc)]
-use super::capability_space::{
-    CapNode,
-};
-#[cfg(doc)]
 use super::capability_space;
+#[cfg(doc)]
+use super::capability_space::CapNode;
 
 pub struct ThreadControlBlock;

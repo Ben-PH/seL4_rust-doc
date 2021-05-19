@@ -69,6 +69,13 @@
 //!
 #![allow(unused_variables, dead_code)]
 
+#[cfg(doc)]
+use crate::kernel_api::syscalls::{
+    send,
+    recv
+};
+#[cfg(doc)]
+use super::threads_and_execution::ThreadControlBlock;
 use crate::types::*;
 mod cap_node;
 pub use cap_node::*;
@@ -85,11 +92,13 @@ pub enum CapErr {
     RevokeFirst,
     NotEnoughMemoory,
 }
+/// Bits used to address a specific CapNode
 pub struct Guard {
     pub value: Word,
     pub bits: u8,
 }
 
+/// An entry in a [CapNode] that contains a specific capability
 /// ```text
 /// ┌─────────────────────┐
 /// │L1 CapNode CapPtr    │
@@ -197,12 +206,18 @@ pub enum CapRights {
     Grant,
     GrantReply,
 }
+
+/// A root [CapNode], allowing a [ThreadControlBlock] to manage its capabilities
+///
+/// Similar to how libc API functions are convenience wrappers arround the POSIX api, methods on this object are wrappers, which use the arguments to correctly configure the use of the [send] and [recv] syscalls, or their companions.
 pub struct CapSpace {
     root: CapNode,
 }
 
 impl CapSpace {
-    /// [mint], with badge set to `None`
+    /// Copy a capability, setting its rights in the process
+    ///
+    /// Optionally: Will mint this new cap with a badge, if provided. If badge is `None`, then it is the equivilent to `seL4_CNode_Copy`
     fn copy(
         &mut self,
         src_slot: Slot,
@@ -226,11 +241,9 @@ impl CapSpace {
         panic!();
     }
 
-    /// Move a capability from one slot to an empty slot.
+    /// Moves a capability from an occupied slot to an empty slot
     ///
-    /// Can optionally mutate the moved/new cap with a new badge
-    /// Destination slot must be empty
-    /// The source slot becomes empty
+    /// If `mutation` is a value of `Some(_)`, then it is the equivilant of `seL4_CNode_Mutate`
     fn r#move(
         &mut self,
         src_slot: Slot,
@@ -266,10 +279,8 @@ impl CapSpace {
     ) -> Result<(), ()> {
         panic!();
     }
-    // fst => scnd
-    // scnd => thd
-    // thd => fst
-    /// Index into a root CapNode and delete that cap
+
+    /// Removes the capability
     fn delete(root_node: &mut CapNode, slot: Slot) -> Result<(), ()> {
         panic!();
     }
@@ -286,6 +297,7 @@ impl CapSpace {
     fn save_caller(root_capnode: &mut CapNode, slot: Slot) -> Result<(), ()> {
         panic!();
     }
+
     /// Allows the reuse of badges by an authority.
     ///
     /// Badged Endpoints only

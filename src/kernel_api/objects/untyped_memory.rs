@@ -1,7 +1,6 @@
 //!
 
-use crate::kernel_api::objects::capability_space::CapNode;
-use crate::kernel_api::objects::capability_space::CapSpace;
+use crate::kernel_api::objects::capability_space::{CapNode, CapSpace, Slot };
 use crate::syscalls::SysResult;
 use crate::types::Word;
 
@@ -9,12 +8,12 @@ pub struct Untyped;
 
 impl Untyped {
     pub fn retype(
-        self,
+        &mut self,
         desired_type: Word,
-        size: Word,
+        size_bits: Word,
         cap_space: CapSpace,
-        node: CapNode,
-        node_offset: Word,
+        cnode: Slot,
+        cnode_offset: Word,
         count: Word,
     ) -> SysResult {
         unimplemented!()

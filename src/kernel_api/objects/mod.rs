@@ -1,12 +1,14 @@
 //! Implement OS services with the creation, manipulation and combination of these.
 //!
 
+pub mod interrupts;
 pub mod capability_space;
 pub mod endpoints;
 pub mod notifications;
-pub mod threads_and_execution;
+pub mod thread_control_block;
 pub mod untyped_memory;
-pub mod virtual_address_spaces;
+// pub mod virtual_address_spaces;
+pub mod vspace;
 /// These objects represent the set of service primitives provided by the kernel
 ///
 /// TODO Think about where in the library these should appear.
@@ -23,16 +25,10 @@ pub mod virtual_address_spaces;
 
 pub enum Objects {
     CNode,
-
     ThreadControlBlock,
-
     EndPoint,
-
     Notification,
-
     VirtualAddressSpace,
-
     Interrupt,
-
     UntypedMemory,
 }

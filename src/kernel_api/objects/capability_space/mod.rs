@@ -70,12 +70,9 @@
 #![allow(unused_variables, dead_code)]
 
 #[cfg(doc)]
-use crate::kernel_api::syscalls::{
-    send,
-    recv
-};
+use crate::kernel_api::syscalls::Syscall;
 #[cfg(doc)]
-use super::threads_and_execution::ThreadControlBlock;
+use super::thread_control_block::ThreadControlBlock;
 use crate::types::*;
 mod cap_node;
 pub use cap_node::*;
@@ -209,20 +206,21 @@ pub enum CapRights {
 
 /// A root [CapNode], allowing a [ThreadControlBlock] to manage its capabilities
 ///
-/// Similar to how libc API functions are convenience wrappers arround the POSIX api, methods on this object are wrappers, which use the arguments to correctly configure the use of the [send] and [recv] syscalls, or their companions.
+/// Similar to how libc API functions are convenience wrappers arround the POSIX api, methods on this object are wrappers, which use the arguments to correctly configure the use of the [Syscall::send] and [Syscall::recv] syscalls, or their companions.
 pub struct CapSpace {
     root: CapNode,
 }
 
+
+
+
 impl CapSpace {
     /// Copy a capability, setting its rights in the process
-    ///
-    /// Optionally: Will mint this new cap with a badge, if provided. If badge is `None`, then it is the equivilent to `seL4_CNode_Copy`
-    fn copy(
+    pub fn copy(
         &mut self,
-        src_slot: Slot,
-        src_root: Option<CapNode>,
         dest_slot: Slot,
+        src_root: Option<&mut CapSpace>,
+        src_slot: Slot,
         rights: CapRights,
     ) -> Result<(), ()> {
         panic!();
@@ -230,10 +228,10 @@ impl CapSpace {
     /// Copy a capability, setting its rights in the process
     ///
     /// Optionally: Will mint this new cap with a badge, if provided
-    fn mint(
+    pub fn mint(
         &mut self,
         src_slot: Slot,
-        src_root: Option<CapNode>,
+        src_root: Option<&mut CapSpace>,
         dest_slot: Slot,
         rights: CapRights,
         badge: Option<Badge>,
@@ -244,7 +242,7 @@ impl CapSpace {
     /// Moves a capability from an occupied slot to an empty slot
     ///
     /// If `mutation` is a value of `Some(_)`, then it is the equivilant of `seL4_CNode_Mutate`
-    fn r#move(
+    pub fn move_(
         &mut self,
         src_slot: Slot,
         dest_root: Option<&mut CapNode>,
@@ -270,7 +268,7 @@ impl CapSpace {
     /// move(pivot, dest) // or move(pivot, src), as src == dest
     /// move(temp, pivot)
     /// ```
-    fn rotate(
+    pub fn rotate(
         dest_slot: Slot,
         pivot_root: Option<&mut CapNode>,
         pivot_slot: Slot,
@@ -281,7 +279,7 @@ impl CapSpace {
     }
 
     /// Removes the capability
-    fn delete(root_node: &mut CapNode, slot: Slot) -> Result<(), ()> {
+    pub fn delete(&mut self, slot: Slot) -> Result<(), ()> {
         panic!();
     }
 
@@ -289,12 +287,12 @@ impl CapSpace {
     ///
     /// Refer to [Untyped] documentation for further details on
     /// capability derivation.
-    fn revoke(&mut self, slot: Slot) {}
+    pub fn revoke(&mut self, slot: Slot) {}
 
     /// Save the kernel generated reply capability from the
     /// most recent time the thread was called, placing it
     /// into this CapSpace so it can be used later
-    fn save_caller(root_capnode: &mut CapNode, slot: Slot) -> Result<(), ()> {
+    pub fn save_caller(root_capnode: &mut CapNode, slot: Slot) -> Result<(), ()> {
         panic!();
     }
 
@@ -306,10 +304,13 @@ impl CapSpace {
     /// The badged endpoint being looked up
     /// has its list of outstanding send operations
     /// with a matching badge
-    fn cancel_badged_sends(
-        root_node: &CapNode,
+    pub fn cancel_badged_sends(
+        &mut self,
+        index: usize,
+        // depth: u8, **because self must be at a depth equivilant to wordsize, this needs to always be 64, no?
+
         // TODO, restrict this to and endpoint only.
-        slot: Slot,
+            
     ) -> Result<(), ()> {
         panic!();
     }

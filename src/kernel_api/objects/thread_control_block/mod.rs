@@ -11,7 +11,6 @@ use super::capability_space;
 #[cfg(doc)]
 use super::capability_space::CapNode;
 
-pub mod interrupts;
 use crate::kernel_api::objects::capability_space::CapSpace;
 use crate::kernel_api::objects::capability_space::Guard;
 use crate::syscalls::SysResult;
@@ -31,7 +30,8 @@ impl ThreadControlBlock {
     pub fn configure(
         &mut self,
         fault_ep: Notification,
-        cap_space: CapSpace,
+        // taking ownership would be a policy statement?
+        cap_space: &CapSpace,
         guard: Option<Guard>,
         vspace: (),
         buffer: Word,

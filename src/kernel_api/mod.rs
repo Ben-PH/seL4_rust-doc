@@ -19,7 +19,7 @@
 //! These provide a message-passing service for communication from [EndPoint]-to-EndPoint, and with
 //! kernel objects services. The details of which are documented in the [syscalls] module
 //!
-//! Logically, the kernel provides three system calls, [send], [recv] and [yield]. However,
+//! Logically, the kernel provides three system calls, [Syscall::send], [Syscall::recv] and [Syscall::yield_]. However,
 //! there are also combinations and variants of the basic Send and Receive calls. See [syscalls] for more details.
 //!
 //! # Kernel Memory Allocation
@@ -44,6 +44,6 @@ use objects::capability_space;
 #[cfg(doc)]
 use objects::capability_space::{CapNode, CapSpace};
 #[cfg(doc)]
-use objects::threads_and_execution::ThreadControlBlock;
+use objects::thread_control_block::ThreadControlBlock;
 #[cfg(doc)]
 use syscalls::*;

@@ -1,9 +1,9 @@
 //! [ASIDPool] and [ASIDControl] for tracking status of an address space.
 
 pub mod arm;
+use crate::kernel_api::interfaces::capability_space::CapSpace;
 use crate::types::SeL4Error;
-use crate::kernel_api::objects::untyped_memory::Untyped;
-use crate::kernel_api::CapSpace;
+use crate::kernel_api::interfaces::untyped_memory::UntypedMemory;
 #[cfg(doc)]
 use arm::VSpace;
 
@@ -30,7 +30,7 @@ pub struct ASIDControl;
 impl ASIDControl {
     pub fn make_pool(
         &mut self,
-        untyped: Untyped,
+        untyped: UntypedMemory,
         cspace: &mut CapSpace,
     ) -> Result<Self, SeL4Error> {
         unimplemented!()

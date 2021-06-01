@@ -1,4 +1,3 @@
-#![no_std]
 //! # WORK IN PROGRESS
 //!
 //! This library is not even close to being suitable as a reference. Please refer to
@@ -57,12 +56,11 @@
 //! This library is limited to the aarch64 platform for the time being.
 
 //! To start, review the [kernel_api] module.
+#![allow(unused_variables)]
 
 pub mod acknowledgements;
-pub mod irq_control;
 pub mod kernel_api;
 pub mod types;
-pub use kernel_api::syscalls;
 
 pub mod bibliography {
 

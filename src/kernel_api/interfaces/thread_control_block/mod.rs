@@ -9,24 +9,37 @@
 #[cfg(doc)]
 use super::capability_space;
 #[cfg(doc)]
-use super::capability_space::CapNode;
+use crate::types::capabilities::CapNode;
 
-use crate::kernel_api::objects::capability_space::CapSpace;
-use crate::kernel_api::objects::capability_space::Guard;
-use crate::syscalls::SysResult;
+use crate::types::capabilities::Capability;
+use crate::kernel_api::interfaces::{
+    capability_space::{Guard, CapSpace },
+    endpoints::IPCBuffer,
+    vspace::arm::Page,
+};
+use crate::kernel_api::syscalls::SysResult;
 use crate::types::capabilities::Notification;
 use crate::types::CapPtr;
 use crate::types::Word;
+use core::num::NonZeroUsize;
 
-pub struct ThreadControlBlock {}
+/// this is a doc-hack
+pub use crate::types::capabilities::ThreadControlBlock;
+// pub struct ThreadControlBlock {
+//     notifications: Vec<Notification>,
+//     fault_ep: EndPoint,
+//     cspace: CapSpace,
+//     cspace_root_guard: Option<NonZeroUsize>,
+//     buffer: *mut IPCBuffer,
+//     buffer_frame: Page,
+// }
+impl Capability for ThreadControlBlock {}
 
 impl ThreadControlBlock {
     pub fn bind_notification(&mut self, ntfn: Notification) -> SysResult {
         unimplemented!()
     }
-    pub fn config_single_stepping(&mut self, bp_num: u16, num_inst: Word) -> SysResult {
-        unimplemented!()
-    }
+
     pub fn configure(
         &mut self,
         fault_ep: Notification,
@@ -39,9 +52,12 @@ impl ThreadControlBlock {
     ) -> SysResult {
         unimplemented!()
     }
+    pub fn read_registers(&self) {
+        unimplemented!()
+    }
     // TODO
+    // pub fn config_single_stepping(&mut self, bp_num: u16, num_inst: Option<NonZeroUsize>)
     // pub fn copy_registers
-    // pub fn read_registers
     // pub fn write_registers
     // pub fn get_breakpoint
     // pub fn set_breakpoint

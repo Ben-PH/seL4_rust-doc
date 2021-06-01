@@ -70,12 +70,11 @@
 #![allow(unused_variables, dead_code)]
 
 #[cfg(doc)]
-use crate::kernel_api::syscalls::Syscall;
+use crate::types::capabilities::UntypedMemory;
 #[cfg(doc)]
-use super::thread_control_block::ThreadControlBlock;
+use crate::types::capabilities::ThreadControlBlock;
+use crate::types::capabilities::CapNode;
 use crate::types::*;
-mod cap_node;
-pub use cap_node::*;
 
 pub enum CapErr {
     InvalidArgument,
@@ -205,8 +204,6 @@ pub enum CapRights {
 }
 
 /// A root [CapNode], allowing a [ThreadControlBlock] to manage its capabilities
-///
-/// Similar to how libc API functions are convenience wrappers arround the POSIX api, methods on this object are wrappers, which use the arguments to correctly configure the use of the [Syscall::send] and [Syscall::recv] syscalls, or their companions.
 pub struct CapSpace {
     root: CapNode,
 }
@@ -283,9 +280,9 @@ impl CapSpace {
         panic!();
     }
 
-    /// Equivilent to [delete] on each capability derived from `slot`
+    /// Equivilent to [CapSpace::delete] on each capability derived from `slot`
     ///
-    /// Refer to [Untyped] documentation for further details on
+    /// Refer to [UntypedMemory] documentation for further details on
     /// capability derivation.
     pub fn revoke(&mut self, slot: Slot) {}
 

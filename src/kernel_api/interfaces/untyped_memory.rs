@@ -1,12 +1,12 @@
 //!
 
-use crate::kernel_api::objects::capability_space::{CapNode, CapSpace, Slot };
-use crate::syscalls::SysResult;
+use crate::kernel_api::interfaces::capability_space::{CapSpace, Slot };
+use crate::kernel_api::syscalls::SysResult;
+pub use crate::types::capabilities::UntypedMemory;
 use crate::types::Word;
 
-pub struct Untyped;
 
-impl Untyped {
+impl UntypedMemory {
     pub fn retype(
         &mut self,
         desired_type: Word,

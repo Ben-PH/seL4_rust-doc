@@ -4,7 +4,7 @@
 //!
 //! This is done by using these primitives to build and configure OS services as applications running in user-mode. In this way, systems with a rich set of features and extensive complexity  can be built for a broad spectrum of application domains, including full-featured operating systems, without making any changes to the supporting formally verified micro-kernel.
 //!
-//! These service primitives are made available through capabilities to kernel [objects] that reside within the kernel. Through these capabilities, a user-level process can direct the kernel to carry out instructions that require privileged mode execution using an seL4 system call. This "capability to kernel object via system call" relationship has elements that are comparable to the "File Descriptor to in-kernel virtual file node via system call" relationship.
+//! A user-level process can indirectly control kernel-managed objects using the service primitives provided, in combination with [capabilities] allowing this control. Many of these capabilies have [interfaces] to allow for idiomatic use of these services. Given the proofs of the seL4 kernel, this allows for an OS to be implemented entirely within user-space.
 //!
 //! # Capability based access control
 //!
@@ -16,12 +16,13 @@
 //!
 //! # System Calls
 //!
-//! These provide a message-passing service for communication from [EndPoint]-to-EndPoint, and with
-//! kernel objects services. The details of which are documented in the [syscalls] module
+//! These provide a [MessageInfo]-passing service for communication from [EndPoint]-to-EndPoint, and with
+//! kernel objects services.The details of which are documented in the [syscalls] module
 //!
-//! Logically, the kernel provides three system calls, [Syscall::send], [Syscall::recv] and [Syscall::yield_]. However,
-//! there are also combinations and variants of the basic Send and Receive calls. See [syscalls] for more details.
+//! The seL4 syscall primitives are `send`, `receive` (both blocking) and `yield`. Less primitive syscalls build on the `send` and `recieve` syscalls.
 //!
+//! Interface methods are provided for kernel objects other than `EndPoint`s and [Notification]s. These are thin wrappers arround a system call, which configures the `MessageInfo` and then invokes the appropriate syscall.
+//! 
 //! # Kernel Memory Allocation
 //!
 //! The seL4 kernel does not dynamically allocate memory for kernel objects. Instead, objecst are created at the application-level using [UntypedMemory] capabilities that provide the authority to do so. Once created, an object consumes a fixed amount of memory. These mechanisms can precisely control the specific amount of physical memory available to an application or device.
@@ -32,18 +33,16 @@
 //!
 //! An [UntypedMemory] object can be reused under specific circumstances. Refer to module level documentation for more details on the _capability derivation tree_, and the use of `revoke`.
 
-pub mod objects;
+pub mod interfaces;
 pub mod syscalls;
 
 #[cfg(doc)]
 use crate::types::capabilities::*;
 #[cfg(doc)]
-use crate::types::CapPtr;
+use crate::types::capabilities;
 #[cfg(doc)]
-use objects::capability_space;
+use crate::types::{MessageInfo, CapPtr };
 #[cfg(doc)]
-use objects::capability_space::{CapNode, CapSpace};
-#[cfg(doc)]
-use objects::thread_control_block::ThreadControlBlock;
+use interfaces::capability_space;
 #[cfg(doc)]
 use syscalls::*;

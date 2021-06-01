@@ -1,7 +1,6 @@
 //! Implement OS services with the creation, manipulation and combination of these.
 //!
 
-pub mod interrupts;
 pub mod capability_space;
 pub mod endpoints;
 pub mod notifications;

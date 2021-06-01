@@ -36,11 +36,10 @@ pub struct VMFault {
     instruction_fault: bool,
     fault_status_register: usize,
 }
-use crate::kernel_api::{
-    capability_space::{CapRights, Slot},
-    objects::untyped_memory::Untyped,
-    objects::vspace::IOSpace,
-    CapSpace,
+use crate::kernel_api::interfaces::{
+    capability_space::{CapSpace, CapRights, Slot},
+    untyped_memory::UntypedMemory,
+    vspace::IOSpace,
 };
 
 /// A 4k object, that can contain up to 1024 `VSpace`s
@@ -49,7 +48,7 @@ use crate::kernel_api::{
 pub struct ASIDPool;
 impl ASIDPool {
     /// Uses an `ASIDControl` and an `Untyped` representing a 4k memory object to make a new `ASIDPool`
-    pub fn new(authority: &mut ASIDControl, untyped_4k: Untyped, cspace: CapSpace, slot: Slot) {
+    pub fn new(authority: &mut ASIDControl, untyped_4k: UntypedMemory, cspace: CapSpace, slot: Slot) {
         unimplemented!()
     }
     /// assings this `ASIDPool` to the `VSpace` passed in

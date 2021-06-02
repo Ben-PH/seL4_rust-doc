@@ -4,7 +4,7 @@
 //!
 //! This is done by using these primitives to build and configure OS services as applications running in user-mode. In this way, systems with a rich set of features and extensive complexity  can be built for a broad spectrum of application domains, including full-featured operating systems, without making any changes to the supporting formally verified micro-kernel.
 //!
-//! A user-level process can indirectly control kernel-managed objects using the service primitives provided, in combination with [capabilities] allowing this control. Many of these capabilies have [interfaces] to allow for idiomatic use of these services. Given the proofs of the seL4 kernel, this allows for an OS to be implemented entirely within user-space.
+//! A user-level process can indirectly control kernel-managed objects using the service primitives provided, in combination with [capabilities] allowing this control. Many of these capabilies have [object_interfaces] to allow for idiomatic use of these services. Given the proofs of the seL4 kernel, this allows for an OS to be implemented entirely within user-space.
 //!
 //! # Capability based access control
 //!
@@ -12,11 +12,11 @@
 //!
 //! With this model, a software component can run within a larger system under a high degree of confidence. If it posseses a limited set of allow-listed operation, such as only being able to perform a IPC read through a specific channel, it will be unable to exceed this scope of behaviour due to issues such as bugs and exploints.
 //!
-//! A [capability_space] is intended to be implemented as a directed graph of [CapNode] kernel-objects, in a way that closely resembles a _guarded page table_ implementation. Refer to module level documentation for more details.
+//! Refer to [capability_space] module documentation for more details.
 //!
 //! # System Calls
 //!
-//! These provide a [MessageInfo]-passing service for communication from [EndPoint]-to-EndPoint, and with
+//! These provide a [message::Info]-passing service for communication from [EndPoint]-to-EndPoint, and with
 //! kernel objects services.The details of which are documented in the [syscalls] module
 //!
 //! The seL4 syscall primitives are `send`, `receive` (both blocking) and `yield`. Less primitive syscalls build on the `send` and `recieve` syscalls.
@@ -33,16 +33,18 @@
 //!
 //! An [UntypedMemory] object can be reused under specific circumstances. Refer to module level documentation for more details on the _capability derivation tree_, and the use of `revoke`.
 
-pub mod interfaces;
+pub mod object_interfaces;
 pub mod syscalls;
+pub mod types;
 
 #[cfg(doc)]
-use crate::types::capabilities::*;
-#[cfg(doc)]
-use crate::types::capabilities;
-#[cfg(doc)]
-use crate::types::{MessageInfo, CapPtr };
-#[cfg(doc)]
-use interfaces::capability_space;
-#[cfg(doc)]
-use syscalls::*;
+use {
+    object_interfaces::{
+        endpoints::EndPoint,
+        capability_space,
+        capability_space::*,
+        notifications::Notification,
+        untyped_memory::UntypedMemory,
+    },
+    types::{*, capabilities},
+};

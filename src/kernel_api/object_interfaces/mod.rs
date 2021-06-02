@@ -1,13 +1,26 @@
 //! Implement OS services with the creation, manipulation and combination of these.
 //!
+//! Under the hood, all the methods on these objects are convenience wrappers arround methods documented in the [syscalls] module. For example, [UntypedMemory::retype] runs the appropriate configuration before calling [syscalls::SeL4Send::send]
 
 pub mod capability_space;
+pub mod reply;
 pub mod endpoints;
 pub mod notifications;
 pub mod thread_control_block;
 pub mod untyped_memory;
-// pub mod virtual_address_spaces;
 pub mod vspace;
+#[cfg(doc)]
+use {
+    super::syscalls,
+    capability_space::*,
+    reply::*,
+    endpoints::*,
+    notifications::*,
+    thread_control_block::*,
+    untyped_memory::*,
+    vspace::*,
+    
+};
 /// These objects represent the set of service primitives provided by the kernel
 ///
 /// TODO Think about where in the library these should appear.

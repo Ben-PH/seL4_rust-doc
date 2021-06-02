@@ -69,32 +69,27 @@
 //!
 #![allow(unused_variables, dead_code)]
 
+use crate::kernel_api::syscalls::SeL4Result;
 #[cfg(doc)]
-use crate::types::capabilities::UntypedMemory;
-#[cfg(doc)]
-use crate::types::capabilities::ThreadControlBlock;
-use crate::types::capabilities::CapNode;
-use crate::types::*;
+use {
+    crate::*,
+    super::thread_control_block::*,
+    super::UntypedMemory,
+};
+use crate::kernel_api::types::{Badge, CapPtr};
 
-pub enum CapErr {
-    InvalidArgument,
-    InvalidCapability,
-    IlligalOperation,
-    RangeError,
-    AlignmentError,
-    FailedLookup,
-    TruncatedMessage,
-    DeleteFirst,
-    RevokeFirst,
-    NotEnoughMemoory,
-}
-/// Bits used to address a specific CapNode
+/// See Ch3 of seL4 manual
+/// these store capabilities, providing permissions to invoke abject methods
+/// Each `CapNode` has a fixed number of slots (2^n)
+pub struct CapNode;
+
+/// Bits used to address a specific [CapNode]
 pub struct Guard {
-    pub value: Word,
+    pub value: usize,
     pub bits: u8,
 }
 
-/// An entry in a [CapNode] that contains a specific capability
+/// Used to index into a [CapSpace], to find a specific entry of a particular [CapNode]
 /// ```text
 /// ┌─────────────────────┐
 /// │L1 CapNode CapPtr    │
@@ -132,51 +127,53 @@ pub struct Guard {
 ///  window: 5                        │                  │        │                  │
 ///                                   │                  │        │                  │
 /// L2 cap itself:                0xFF└──────────────────┘        │                  │
-///  * set defth limit: 12bits                                0xFF└──────────────────┘
+///  * set depth limit: 12bits                                0xFF└──────────────────┘
 ///  * 0x0_0F_MASKED
 ///  * with depth limit of 12, only left-most 12 bits are assesed, preventing a dereference
 /// ```
 pub struct Slot {
-    idx: CapPtr,
-    depth: u8,
+    pub idx: CapPtr,
+    pub depth: u8,
 }
 
-pub type CapLookupResult<T> = Result<T, LookupFailure>;
+// pub type CapLookupResult<T> = Result<T, LookupFailure>;
 
-pub struct GuardMismatchData {
-    /// Number of bits in the capability pointer left to decode
-    bits_left: u8,
-    /// The actual guard of the CNode
-    guard_found: u8,
-    /// The CNode guard-size
-    bits_found: u8,
-}
-pub struct DepthMismatchData {
-    /// Number of bits in the capability pointer left to decode
-    bits_left: u8,
-    /// Bits of current CNode being traversed resolved
-    bits_found: u8,
-}
+// pub struct GuardMismatchData {
+//     /// Number of bits in the capability pointer left to decode
+//     pub bits_left: u8,
+//     /// The actual guard of the CNode
+//     pub guard_found: u8,
+//     /// The CNode guard-size
+//     pub bits_found: u8,
+// }
+// pub struct DepthMismatchData {
+//     /// Number of bits in the capability pointer left to decode
+//     pub bits_left: u8,
+//     /// Bits of current CNode being traversed resolved
+//     pub bits_found: u8,
+// }
 
-pub enum LookupFailure {
-    /// The root capability is invaled, e.g. not a CNode cap
-    InvalidRoot,
-    /// A capability needed for an invocation is not present
-    /// or doesn't have sufficient rights.
-    /// Provides bits remaining(what does this mean???)
-    MissingCapability(u8),
+// pub enum LookupFailure {
+//     /// The root capability is invaled, e.g. not a CNode cap
+//     InvalidRoot,
+//     /// A capability needed for an invocation is not present
+//     /// or doesn't have sufficient rights.
+//     /// Provides bits remaining(what does this mean???)
+//     MissingCapability(u8),
 
-    ///When resolving a cap, a CNode was traveresed that:
-    /// * resolved more bits than was left to decode in the cap, or
-    /// * a non-CNode capability was encountered with bits remaining
-    DepthMisMatch(DepthMismatchData),
+//     ///When resolving a cap, a CNode was traveresed that:
+//     /// * resolved more bits than was left to decode in the cap, or
+//     /// * a non-CNode capability was encountered with bits remaining
+//     DepthMisMatch(DepthMismatchData),
 
-    /// When resolving a cap, a Cnode was traveresd
-    /// * With a guard-size larger than the # of remaning bits, OR
-    /// * The CNode's guard did not match the next bits of cap being resolved
-    GuardMismatch(GuardMismatchData),
-}
+//     /// When resolving a cap, a Cnode was traveresd
+//     /// * With a guard-size larger than the # of remaning bits, OR
+//     /// * The CNode's guard did not match the next bits of cap being resolved
+//     GuardMismatch(GuardMismatchData),
+// }
 
+/// Used in configuring capability permissions
+///
 /// ```text
 /// +-------------+-------------+-------------+-------------+-------------+
 /// | Type        | Read        | Write       | Grant       | GrantReply  |
@@ -190,62 +187,58 @@ pub enum LookupFailure {
 /// | Page        | Mapping page| Mapping page| N/A         | N/A         |
 /// |             | readable    |writable     |             |             |
 /// +-------------+-------------+-------------+-------------+-------------+
-/// | Reply       | N/A         | N/A         | Sending any |             |
+/// | Reply       | N/A         | N/A         | Sending any | N/A         |
 /// |             |             |             | capabilities|             |
 /// |             |             |             | in reply    |             |
 /// |             |             |             | message     |             |
 /// +-------------+-------------+-------------+-------------+-------------+
 /// ```
-pub enum CapRights {
-    Read,
-    Write,
-    Grant,
-    GrantReply,
+pub struct CapRights {
+    pub can_read: bool,
+    pub can_write: bool,
+    pub can_grant: bool,
+    pub can_grantReply: bool,
 }
 
 /// A root [CapNode], allowing a [ThreadControlBlock] to manage its capabilities
 pub struct CapSpace {
-    root: CapNode,
+    pub root_cnode: CapNode,
 }
 
-
-
-
+/// Rust equivilent of `seL4_CNode_${Func}` functions
 impl CapSpace {
     /// Copy a capability, setting its rights in the process
-    pub fn copy(
-        &mut self,
-        dest_slot: Slot,
-        src_root: Option<&mut CapSpace>,
-        src_slot: Slot,
-        rights: CapRights,
-    ) -> Result<(), ()> {
-        panic!();
-    }
-    /// Copy a capability, setting its rights in the process
     ///
-    /// Optionally: Will mint this new cap with a badge, if provided
+    /// if `badge` is `None`, then this is equivilant to `seL4_CNode_Copy`
+    ///
+    /// if dest_root is Some, then the copy ends up in the dest cap_space.
+    ///
+    /// if dest_root is None, then `dest_slot` must not equal `src_slot`, otherwise
+    /// the clash will result in an error.
+    ///
     pub fn mint(
         &mut self,
         src_slot: Slot,
-        src_root: Option<&mut CapSpace>,
+        dest_root: Option<&mut CapSpace>,
         dest_slot: Slot,
         rights: CapRights,
         badge: Option<Badge>,
-    ) -> Result<(), ()> {
+    ) -> SeL4Result<()> {
         panic!();
     }
 
     /// Moves a capability from an occupied slot to an empty slot
     ///
     /// If `mutation` is a value of `Some(_)`, then it is the equivilant of `seL4_CNode_Mutate`
+    ///
+    /// same dest_root and slot rules apply as `mint`
     pub fn move_(
         &mut self,
         src_slot: Slot,
         dest_root: Option<&mut CapNode>,
         dest_slot: Slot,
         mutation: Option<Badge>,
-    ) -> Result<(), ()> {
+    ) -> SeL4Result<()> {
         panic!();
     }
 
@@ -258,12 +251,13 @@ impl CapSpace {
     /// analagous to the following, only done atomically
     /// ```
     /// // src != dest
-    /// move(pivot, src);
-    /// move(dest, pivot);
+    /// pivot_cspace.move_(pivot, dest_cspace, dest, None);
+    /// src_cspace.move_(src, pivot_cspace, pivot, None);
     /// // src == dst
-    /// move(src, temp)
-    /// move(pivot, dest) // or move(pivot, src), as src == dest
-    /// move(temp, pivot)
+    /// src_cspace.move_(src, tmp_cspace, tmp, None);
+    /// // or pivot_cspace.move_(pivot, src_cspace, src, None), as src == dest
+    /// pivot_cspace.move_(pivot, dest_cspace, dest);
+    /// temp_cspace.move_(temp, pivot_cspace, pivot, None);
     /// ```
     pub fn rotate(
         dest_slot: Slot,
@@ -271,12 +265,12 @@ impl CapSpace {
         pivot_slot: Slot,
         source_root: Option<&mut CapNode>,
         source_slot: Slot,
-    ) -> Result<(), ()> {
+    ) -> SeL4Result<()> {
         panic!();
     }
 
     /// Removes the capability
-    pub fn delete(&mut self, slot: Slot) -> Result<(), ()> {
+    pub fn delete(&mut self, slot: Slot) -> SeL4Result<()> {
         panic!();
     }
 
@@ -284,12 +278,12 @@ impl CapSpace {
     ///
     /// Refer to [UntypedMemory] documentation for further details on
     /// capability derivation.
-    pub fn revoke(&mut self, slot: Slot) {}
+    pub fn revoke(&mut self, slot: Slot) -> SeL4Result<()> {unimplemented!()}
 
     /// Save the kernel generated reply capability from the
     /// most recent time the thread was called, placing it
     /// into this CapSpace so it can be used later
-    pub fn save_caller(root_capnode: &mut CapNode, slot: Slot) -> Result<(), ()> {
+    pub fn save_caller(root_capnode: &mut CapNode, slot: Slot) -> SeL4Result<()> {
         panic!();
     }
 
@@ -304,11 +298,8 @@ impl CapSpace {
     pub fn cancel_badged_sends(
         &mut self,
         index: usize,
-        // depth: u8, **because self must be at a depth equivilant to wordsize, this needs to always be 64, no?
-
         // TODO, restrict this to and endpoint only.
-            
-    ) -> Result<(), ()> {
+    ) -> SeL4Result<()> {
         panic!();
     }
 }

@@ -43,24 +43,21 @@
 //! The intent is to leverage Rusts expressive type system
 //! Idiomatic Rust equivilant might follow these examples
 //!
-//!  * C "0 on success, error data arrangement depending on error" becomes `Result<(), SomeEnum>`
+//!  * C "0 on success, error data arrangement depending on error" becomes `Result<(), `[`SeL4Error`]`>`, which is further aliased to [SeL4Result]<()>
 //!  * When an operation has an "optional extension", and opting into this extension
 //!    is achieved by calling a different function with an added argument, these are
 //!    can be combined into a single function with an `Option<_>` argument to differentiate.
-//!  * Use traits, such as when different kernel objects use a common set of function signatures.
+//!  * Use traits
 //!
-//! I consider the measure of this projects success to be how close its generated docs might
-//! be, if the API was originally implemented using Rust while putting significant emphasis on
-//! teaching value the documentation provides.
-//!
-//! This library is limited to the aarch64 platform for the time being.
+//! Where the api is architecture defined, his library is limited to the aarch64 platform for the time being.
 
-//! To start, review the [kernel_api] module.
-#![allow(unused_variables)]
+#![allow(unused_variables, unreachable_code, dead_code)]
 
 pub mod acknowledgements;
 pub mod kernel_api;
-pub mod types;
+
+#[cfg(doc)]
+use {kernel_api::syscalls::*, kernel_api::*, kernel_api::types::*};
 
 pub mod bibliography {
 

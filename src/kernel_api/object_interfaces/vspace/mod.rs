@@ -1,31 +1,31 @@
 //! [ASIDPool] and [ASIDControl] for tracking status of an address space.
 
-pub mod arm;
-use crate::kernel_api::interfaces::capability_space::CapSpace;
+pub mod aarch64;
+use crate::kernel_api::object_interfaces::capability_space::CapSpace;
 use crate::types::SeL4Error;
-use crate::kernel_api::interfaces::untyped_memory::UntypedMemory;
+use crate::kernel_api::object_interfaces::untyped_memory::UntypedMemory;
 #[cfg(doc)]
-use arm::VSpace;
+use aarch64::VSpace;
 
 /// Documentation not present for aarch64
 pub struct IOSpace;
+
+/// The capability from which [ASIDPool] capabilities can be created
+pub struct ASIDControl;
 
 /// Confers the right to create a subset the available applications
 ///
 /// For a VSpace to be usable by an app, it must be assigned an ASID using the [ASIDPool::assign] fn
 pub struct ASIDPool;
-
 impl ASIDPool {
     /// Gives a [VSpace] an id, by way of placing it in an `ASIDPool`
     ///
     /// This method must be run before a vspace can be used.
-    pub fn assign(&mut self, vspace: arm::VSpace) -> Result<(), SeL4Error> {
+    pub fn assign(&mut self, vspace: aarch64::VSpace) -> Result<(), SeL4Error> {
         unimplemented!()
     }
 }
 
-/// The capability from which [ASIDPool] capabilities can be created
-pub struct ASIDControl;
 
 impl ASIDControl {
     pub fn make_pool(

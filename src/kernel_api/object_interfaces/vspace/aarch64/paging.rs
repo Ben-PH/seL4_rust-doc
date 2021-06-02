@@ -6,7 +6,6 @@
 /// There is a fixed maximum number of applications the system can support. This capability is used to create [ASIDPool] capabilities, which themselves authorise the creation of a subset of these applications.
 
 pub struct ASIDControl;
-use super::VSpace;
 
 /// Specifies the cache behaviour of a page being mapped
 pub enum VMAttributes {
@@ -36,7 +35,7 @@ pub struct VMFault {
     instruction_fault: bool,
     fault_status_register: usize,
 }
-use crate::kernel_api::interfaces::{
+use crate::kernel_api::object_interfaces::{
     capability_space::{CapSpace, CapRights, Slot},
     untyped_memory::UntypedMemory,
     vspace::IOSpace,
@@ -82,14 +81,14 @@ pub trait CacheControl {
 /// Level 0 in the 4-level page-table structure.
 ///
 /// Provides a global VSpace, i.e. from 0x0 to 2^47 - 1
-pub struct PageGlobalDirectory;
+pub struct VSpace;
 /// Level 1 mapping structure. Is effectively a sparse-array of up to 512
-/// entries, each being either a 1GiB frame (HugePage), or a PageDirectory.
+/// entries, each being either a 1GiB frame (HugePage), or a PageDir.
 ///
 /// An example structure to represent this is as follows
 /// ```
 /// enum Level2 {
-///     PageDirectory,
+///     PageDir,
 ///     HugePage,
 /// }
 /// struct PUDSpec {
@@ -112,14 +111,14 @@ pub struct PageGlobalDirectory;
 /// // this would cause a VMFault, as it's not yet mapped
 /// // let x_val = unsafe {*x};
 /// // First, make a PUD. The untyped it's coming from must be 12bits in size
-/// let mut pud = PageUpperDirectory::from_ut(
+/// let mut pud = PageUpperDir::from_ut(
 ///     &mut untyped,
 ///     &cap_space,
 ///     &mut target_cnode,
 ///     &target_slot,
 /// );
 /// // Now, map it in so that we have 1GiB address space that can
-/// // take either PageDirectory mappings, or
+/// // take either PageDir mappings, or
 /// pud.map(vspace, 0xA0_0000_0000, VMAttributes::default())
 ///
 /// let read_rights = RightsBuilder::new().can_read()..build();
@@ -127,17 +126,17 @@ pub struct PageGlobalDirectory;
 /// let rw_rights = RightsBuilder::new().can_read().can_write().build();
 /// // map it in to read
 /// ```
-pub struct PageUpperDirectory;
+pub struct PageUpperDir;
 /// Level 2 in the 4-level page-table structure.
 ///
 /// Address bits 21..=29
-pub struct PageDirectory;
+pub struct PageDir;
 /// Level 3 in the 4-level page-table structure.
 ///
 /// Address bits 12..=20
 pub struct PageTable;
 
-impl CacheControl for PageGlobalDirectory {
+impl CacheControl for VSpace {
     fn clean_data(&mut self, start_offset: usize, end_offset_excl: usize) {
         unimplemented!()
     }
@@ -151,26 +150,11 @@ impl CacheControl for PageGlobalDirectory {
         unimplemented!()
     }
 }
-/// For map/unmap of a paging object in/out of its host object
-pub trait Mapping {
-    type Host;
-    fn map(&mut self, host: Self::Host, vaddr: usize, attr: VMAttributes);
-    fn unmap(&self);
-}
-impl Mapping for PageUpperDirectory {
-    type Host = PageGlobalDirectory;
-    fn map(&mut self, pgd: Self::Host, vaddr: usize, attr: VMAttributes) {
-        unimplemented!()
-    }
-    fn unmap(&self) {
-        unimplemented!()
-    }
-}
 
-/// Corresponds to a frame of physical memory that is used to implement virtual memory pages in a virtual address space
+/// Corresponds to a frame of physical memory that that backs virtual memory pages in a virtual address space
 ///
-/// The virtual address for a mapping must be alligned to page size, and must be mapped to a suitable vspace and all the intermediate paging structures required.
-/// To map a page readable and/or writable, th page capability must have read ond/or write permissions.
+/// The virtual address for a mapping must be alligned to page size, and must be mapped to a suitable vspace via all the intermediate paging structures required.
+/// To map a page readable and/or writable, the page capability must have read ond/or write permissions.
 /// If the permissions of the CapRights given to the mapping exceed tthe rights of the page being mapped, then the mapping permissions are silently down-graded.
 pub enum Page {
     /// 1GiB
@@ -180,6 +164,7 @@ pub enum Page {
     /// 1KiB
     Small,
 }
+
 impl CacheControl for Page {
     fn clean_data(&mut self, start_offset: usize, end_offset_excl: usize) {
         unimplemented!()
@@ -224,20 +209,35 @@ impl Page {
     }
 }
 
-impl Mapping for PageTable {
-    type Host = VSpace;
 
-    fn map(&mut self, vspace: Self::Host, vaddr: usize, attr: VMAttributes) {
+/// For map/unmap of a paging object in/out of its host object
+pub trait Mapping {
+    type Host;
+    fn map(&mut self, host: Self::Host, vaddr: usize, attr: VMAttributes);
+    fn unmap(&self);
+}
+impl Mapping for PageUpperDir {
+    type Host = VSpace;
+    fn map(&mut self, pgd: Self::Host, vaddr: usize, attr: VMAttributes) {
         unimplemented!()
     }
     fn unmap(&self) {
         unimplemented!()
     }
 }
-
-impl Mapping for PageDirectory {
-    type Host = PageUpperDirectory;
+impl Mapping for PageDir {
+    type Host = PageUpperDir;
     fn map(&mut self, pud: Self::Host, vaddr: usize, attr: VMAttributes) {
+        unimplemented!()
+    }
+    fn unmap(&self) {
+        unimplemented!()
+    }
+}
+impl Mapping for PageTable {
+    type Host = PageDir;
+
+    fn map(&mut self, vspace: Self::Host, vaddr: usize, attr: VMAttributes) {
         unimplemented!()
     }
     fn unmap(&self) {

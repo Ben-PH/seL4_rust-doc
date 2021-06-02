@@ -1,5 +1,5 @@
 #[cfg(doc)]
-use crate::types::capabilities::EndPoint;
+use crate::kernel_api::object_interfaces::endpoints::EndPoint;
 /// TODO confirm thet seL4_Word is usize_t
 pub struct Word(pub usize);
 /// Optionally added to an [EndPoint] capability on creation,

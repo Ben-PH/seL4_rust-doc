@@ -67,10 +67,10 @@
 //!      29                           0        20                  0
 //!```
 mod paging;
-pub use paging::PageGlobalDirectory as VSpace;
 pub use paging::{
-    PageUpperDirectory,
-    PageDirectory,
+    VSpace,
+    PageUpperDir,
+    PageDir,
     PageTable,
     Page,
     Mapping,

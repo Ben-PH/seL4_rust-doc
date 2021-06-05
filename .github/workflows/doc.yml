@@ -1,0 +1,28 @@
+name: Documentation
+
+on:
+  push:
+    branches: [ master ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build docs
+      run: cargo doc --color=always
+    - name: Copy docs and push
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git checkout gh-pages
+        rm -rf docs
+        cp -r target/doc ./docs
+        cp index.html docs/
+        git commit -am "Generated docs from github-actions[bot]"
+        git push

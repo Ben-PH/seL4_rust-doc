@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/kernel_api/mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../sel4_rust_doc/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1"> 1</span>
+<span id="2"> 2</span>
+<span id="3"> 3</span>
+<span id="4"> 4</span>
+<span id="5"> 5</span>
+<span id="6"> 6</span>
+<span id="7"> 7</span>
+<span id="8"> 8</span>
+<span id="9"> 9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+</pre><div class="example-wrap"><pre class="rust ">
+<span class="doccomment">//! # A small set of services and objects</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The microkernel provides a minimal set of service primitives, and a &quot;root-server&quot; application. A &quot;hello-world&quot; root-server is somewhat analagous to a monolithic kernels main function printing &quot;hello-world&quot;. The key difference being, that where OS161 and other monolithic-kernel operating systems typically manage OS services and resources from within the kernel, seL4 allows this to be done from the root-server, and other delegated processes, while in user-space.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This is done by using these primitives to build and configure OS services as applications running in user-mode. In this way, systems with a rich set of features and extensive complexity  can be built for a broad spectrum of application domains, including full-featured operating systems, without making any changes to the supporting formally verified micro-kernel.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! A user-level process can indirectly control kernel-managed objects using the service primitives provided, in combination with [capabilities] allowing this control. Many of these capabilies have [object_interfaces] to allow for idiomatic use of these services. Given the proofs of the seL4 kernel, this allows for an OS to be implemented entirely within user-space.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Capability based access control</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! A capability is an unforgeable token that references a specific instance of kernel-managed objects, and the methods that may be invoked with each object. This governs all kernel services: In order to do something, an application must provide the corresponding token of permission to do it.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! With this model, a software component can run within a larger system under a high degree of confidence. If it posseses a limited set of allow-listed operation, such as only being able to perform a IPC read through a specific channel, it will be unable to exceed this scope of behaviour due to issues such as bugs and exploints.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Refer to [capability_space] module documentation for more details.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # System Calls</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! These provide a [message::Info]-passing service for communication from [EndPoint]-to-EndPoint, and with</span>
+<span class="doccomment">//! kernel objects services.The details of which are documented in the [syscalls] module</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The seL4 syscall primitives are `send`, `receive` (both blocking) and `yield`. Less primitive syscalls build on the `send` and `recieve` syscalls.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Interface methods are provided for kernel objects other than `EndPoint`s and [Notification]s. These are thin wrappers arround a system call, which configures the `MessageInfo` and then invokes the appropriate syscall.</span>
+<span class="doccomment">//! </span>
+<span class="doccomment">//! # Kernel Memory Allocation</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The seL4 kernel does not dynamically allocate memory for kernel objects. Instead, objecst are created at the application-level using [UntypedMemory] capabilities that provide the authority to do so. Once created, an object consumes a fixed amount of memory. These mechanisms can precisely control the specific amount of physical memory available to an application or device.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! At boot time, the kernel pre-allocates the memory it requires for itself. It then spawns a _root server_, to which it hands all remaining memory in the form of a single [UntypedMemory] capability, and a number of other capabilities that form a &quot;primordial soup&quot; of capabilities. From this, you can split the untyped region into smaller regions. The smaller regiouns can be retyped into other kernel objects. It can then delegate all, or part of the resulting authorities to one or more of its clients.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Capability derivation and Memory Reuse</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! An [UntypedMemory] object can be reused under specific circumstances. Refer to module level documentation for more details on the _capability derivation tree_, and the use of `revoke`.</span>
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">object_interfaces</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">syscalls</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">types</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">doc</span>)]</span>
+<span class="kw">use</span> {
+    <span class="ident">object_interfaces</span>::{
+        <span class="ident">endpoints</span>::<span class="ident">EndPoint</span>,
+        <span class="ident">capability_space</span>,
+        <span class="ident">capability_space</span>::<span class="kw-2">*</span>,
+        <span class="ident">notifications</span>::<span class="ident">Notification</span>,
+        <span class="ident">untyped_memory</span>::<span class="ident">UntypedMemory</span>,
+    },
+    <span class="ident">types</span>::{<span class="kw-2">*</span>, <span class="ident">capabilities</span>},
+};
+</pre></div>
+</section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="sel4_rust_doc" data-search-js="../../../search-index.js"></div>
+    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script></body></html>

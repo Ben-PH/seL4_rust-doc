@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["IRQControl","Required to create [IRQHandler] capabilities using its `get` function"],["IRQHandler","A special [Notification] capability to be used in response to an interupt."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["interrupts","A notification dedicated recieving an interupt."]],"struct":[["Notification","A simple signaling mechanism."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["aarch64_vspace","sel4 manual ch8"]],"trait":[["Capability","Marker trait to indicate a type represents a capability"],["FromUntyped","Not all capabilities can be created from [UntypedMemory::retype] alone. For example ASIDPool and IRQHandler also require ASIDControl and IRQControl respectively."]]});

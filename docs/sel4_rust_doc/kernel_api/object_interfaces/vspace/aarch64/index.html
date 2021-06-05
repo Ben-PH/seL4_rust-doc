@@ -1,0 +1,82 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Representing the aarch64 address management"><meta name="keywords" content="rust, rustlang, rust-lang, aarch64"><title>sel4_rust_doc::kernel_api::object_interfaces::vspace::aarch64 - Rust</title><link rel="stylesheet" type="text/css" href="../../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../../../storage.js"></script><script src="../../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../../../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../../sel4_rust_doc/index.html'><div class='logo-container rust-logo'><img src='../../../../../rust-logo.png' alt='logo'></div></a><p class="location">Module aarch64</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li></ul></div><p class="location"><a href="../../../../index.html">sel4_rust_doc</a>::<wbr><a href="../../../index.html">kernel_api</a>::<wbr><a href="../../index.html">object_interfaces</a>::<wbr><a href="../index.html">vspace</a></p><div id="sidebar-vars" data-name="aarch64" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><script src="../../../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" class="help-button">?</button>
+                <a id="settings-menu" href="../../../../../settings.html"><img src="../../../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Module <a href="../../../../index.html">sel4_rust_doc</a>::<wbr><a href="../../../index.html">kernel_api</a>::<wbr><a href="../../index.html">object_interfaces</a>::<wbr><a href="../index.html">vspace</a>::<wbr><a class="mod" href="">aarch64</a></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../../../../../src/sel4_rust_doc/kernel_api/object_interfaces/vspace/aarch64/mod.rs.html#1-79" title="goto source code">[src]</a></span></h1><div class="docblock"><p>Representing the aarch64 address management</p>
+<p>To illustrate the page-table structure:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">struct</span> <span class="ident">VSpaceWrapper</span> {
+    <span class="comment">// A sparse-array of the first indirection</span>
+    <span class="ident">inner</span>: [<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PageUpperDirWrapper</span><span class="op">&gt;</span> ; <span class="number">512</span>]
+}
+<span class="kw">struct</span> <span class="ident">PageUpperDirWrapper</span> {
+    <span class="comment">// A sparse-array of the second indirection</span>
+    <span class="ident">inner</span>: [<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Level2</span><span class="op">&gt;</span> ; <span class="number">512</span>]
+}
+<span class="kw">enum</span> <span class="ident">Level2</span> {
+    <span class="comment">// Another indirection to follow</span>
+    <span class="ident">PageDirectory</span>,
+    <span class="comment">// A mapping to 1GiB of physical memory</span>
+    <span class="comment">// First indirection yielded a mapping to a physical frame</span>
+    <span class="ident">HugePage</span>,
+}
+<span class="kw">struct</span> <span class="ident">PageDirWrapper</span> {
+    <span class="comment">// A sparse-array of the third indirection</span>
+    <span class="ident">inner</span>: [<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Level3</span><span class="op">&gt;</span> ; <span class="number">512</span>]
+}
+<span class="kw">enum</span> <span class="ident">Level3</span> {
+    <span class="ident">PageTable</span>,
+    <span class="comment">// A mapping to 2MiB of physical memory</span>
+    <span class="ident">LargePage</span>,
+}
+<span class="kw">struct</span> <span class="ident">PageTabWrapper</span> {
+    <span class="comment">// A sparse array of 4KiB mappings, and final indirection</span>
+    <span class="ident">inner</span>: [<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SmallPage</span><span class="op">&gt;</span> ; <span class="number">512</span>]
+}</pre></div>
+<p>A mockup to visualise the aarch64 paging structure</p>
+<pre><code class="language-text">The following address ranges are mapped in:
+0xDEADBEEF000..=0xDEADBEEFFFF (4KiB)
+0xDEADC400000..=0xDEADC5FFFFF (2MiB)
+0xDEB40000000..=0xDEB6FFFFFFF (1GiB)
+
+      000011011___110101011___011011111___011011111___0100_0010_0000
+        │             │             │             │              │
+ VSpace ▼      PgUpDir▼      PgDir  ▼      PgTable▼              │
+┌─────────┐ ┌─▲─────────┐ ┌─▲─────────┐ ┌─▲─────────┐            │
+│000000000│ │ │000000000│ │ │000000000│ │ │000000000│            │
+│.        │ │ │.        │ │ │.        │ │ │.        │            │
+│.        │ │ │.        │ │ │.        │ │ │.        │            │
+│.        │ │ │.        │ │ │.        │ │ │.        │            │
+│.        │ │ │.        │ │ │011011111├─┘ │.        │            │
+│.        │ │ │110101011├─┘ │.        │   │.        │  SmallPgObj▼
+│000011011├─┘ │.        │   │.        │   │011101111├─▲────────────┐
+│.        │   │110101101├─┐ │011100010├─┐ │.        │ │000000000000│
+│.        │   │.        │ │ │.        │ │ │.        │ │            │
+│.        │   │.        │ │ │.        │ │ │.        │ │010000100000│
+│111111111│   │111111111│ │ │111111111│ │ │111111111│ │            │
+ ▲ ───── ▲     ▲ ───── ▲  │  ▲ ───── ▲  │  ▲ ───── ▲  │111111111111│
+ 47     39     38     30  │  29     21  │  20     12   ▲ ──────── ▲
+                          │             │              11         0
+     HugePageObject       │             │  LargePageObject
+    ┌─────────────────────▼────────┐    └─▲─────────────────────┐
+    │000000000000000000000000000000│      │000000000000000000000│
+    │..                            │      │.                    │
+    │011100010011011111010000100000│      │011011111010000100000│
+    │..                            │      │..                   │
+    │111111111111111111111111111111│      │111111111111111111111│
+     ▲ ────────────────────────── ▲        ▲ ───────────────── ▲
+     29                           0        20                  0
+</code></pre>
+</div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<table><tr class="module-item"><td><a class="struct" href="struct.IOPageTable.html" title="sel4_rust_doc::kernel_api::object_interfaces::vspace::aarch64::IOPageTable struct">IOPageTable</a></td><td class="docblock-short"><p>Documentation not present for aarch64</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.PageDir.html" title="sel4_rust_doc::kernel_api::object_interfaces::vspace::aarch64::PageDir struct">PageDir</a></td><td class="docblock-short"><p>Level 2 in the 4-level page-table structure.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.PageTable.html" title="sel4_rust_doc::kernel_api::object_interfaces::vspace::aarch64::PageTable struct">PageTable</a></td><td class="docblock-short"><p>Level 3 in the 4-level page-table structure.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.PageUpperDir.html" title="sel4_rust_doc::kernel_api::object_interfaces::vspace::aarch64::PageUpperDir struct">PageUpperDir</a></td><td class="docblock-short"><p>Level 1 mapping structure. Is effectively a sparse-array of up to 512
+entries, each being either a 1GiB frame (HugePage), or a PageDir.</p>
+</td></tr><tr class="module-item"><td><a class="struct" href="struct.VSpace.html" title="sel4_rust_doc::kernel_api::object_interfaces::vspace::aarch64::VSpace struct">VSpace</a></td><td class="docblock-short"><p>Level 0 in the 4-level page-table structure.</p>
+</td></tr></table><h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<table><tr class="module-item"><td><a class="enum" href="enum.Page.html" title="sel4_rust_doc::kernel_api::object_interfaces::vspace::aarch64::Page enum">Page</a></td><td class="docblock-short"><p>Corresponds to a frame of physical memory that that backs virtual memory pages in a virtual address space</p>
+</td></tr></table><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
+<table><tr class="module-item"><td><a class="trait" href="trait.CacheControl.html" title="sel4_rust_doc::kernel_api::object_interfaces::vspace::aarch64::CacheControl trait">CacheControl</a></td><td class="docblock-short"></td></tr><tr class="module-item"><td><a class="trait" href="trait.Mapping.html" title="sel4_rust_doc::kernel_api::object_interfaces::vspace::aarch64::Mapping trait">Mapping</a></td><td class="docblock-short"><p>For map/unmap of a paging object in/out of its host object</p>
+</td></tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><div id="rustdoc-vars" data-root-path="../../../../../" data-current-crate="sel4_rust_doc" data-search-js="../../../../../search-index.js"></div>
+    <script src="../../../../../main.js"></script></body></html>

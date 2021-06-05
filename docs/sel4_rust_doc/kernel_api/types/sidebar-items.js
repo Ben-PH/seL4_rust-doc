@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["capabilities",""],["err",""],["message",""]],"struct":[["Badge","Optionally added to an [EndPoint] capability on creation,"],["CapPtr",""]]});

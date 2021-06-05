@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["IPCBuffer","A representation of the data transferred in a systemcall."],["Info","A bit-packed word that provides meta-information about an IPC"]]});

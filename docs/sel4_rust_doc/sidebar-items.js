@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["acknowledgements","Content of manuals Acknowledgements."],["bibliography","Direct copy-paste of the raw text from the manual bibliography section"],["kernel_api","A small set of services and objects"]]});

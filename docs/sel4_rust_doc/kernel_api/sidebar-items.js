@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["object_interfaces","Implement OS services with the creation, manipulation and combination of these."],["syscalls","Raw kernel interface. When invoked with a capability, allows for IPC communication and use of kernel objects."],["types",""]]});

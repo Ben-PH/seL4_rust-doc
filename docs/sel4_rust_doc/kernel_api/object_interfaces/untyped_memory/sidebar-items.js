@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["UntypedMemory","sel4 manual section 2.4"]]});

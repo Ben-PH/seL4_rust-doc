@@ -52,6 +52,8 @@
 //! Where the api is architecture defined, his library is limited to the aarch64 platform for the time being.
 
 #![allow(unused_variables, unreachable_code, dead_code)]
+#![no_std]
+#![feature(negative_impls)]
 
 pub mod acknowledgements;
 pub mod kernel_api;

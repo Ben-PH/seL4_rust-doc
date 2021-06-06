@@ -9,4 +9,7 @@ pub use primitives::{Badge};
 pub use err::SeL4Error;
 
 
+impl !Send for CapPtr {}
+impl !Sync for CapPtr {}
 pub struct CapPtr(usize);
+

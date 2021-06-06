@@ -15,7 +15,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build docs
-      run: cargo doc --color=always
+      run: |
+        rustup default nightly
+        cargo +nightly doc --color=always
     - name: Copy docs and push
       run: |
         git fetch --all
